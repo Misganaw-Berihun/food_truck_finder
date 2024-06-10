@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-jx!)g7+1-w!_&+7n80@=cxsah=-dbu8srwy(_!^v7@-(le3p7x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['food-truck-finder-8h2u.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition

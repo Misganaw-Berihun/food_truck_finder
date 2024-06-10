@@ -20,6 +20,22 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the project files
 COPY . /code/
 
+RUN ["python", "manage.py", "makemigrations", "app"]
+RUN ["python", "manage.py", "migrate"]
+
+# Copy the entrypoint script
+COPY entrypoint.sh /code/entrypoint.sh
+
+# Set environment variables for superuser creation
+ENV DJANGO_SUPERUSER_USERNAME=admin
+ENV DJANGO_SUPERUSER_EMAIL=admin@example.com
+ENV DJANGO_SUPERUSER_PASSWORD=adminpassword
+
+# Make entrypoint.sh executable
+RUN chmod +x /code/entrypoint.sh
+
+# Entry point to run migrations, create superuser, and start the server
+ENTRYPOINT ["./entrypoint.sh"]
 
 # Expose port 8000 for the application
 EXPOSE 8000
