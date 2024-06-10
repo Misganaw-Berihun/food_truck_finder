@@ -38,7 +38,7 @@ Getting Started:
 
 ### 1.Clone the Repository:
 
-    git clone https://github.com/Misganaw-Berihun/san-francisco-food-trucks.git
+    git clone https://github.com/<your-username>/san-francisco-food-trucks.git
 
 ### 2.Install Dependencies:
 
