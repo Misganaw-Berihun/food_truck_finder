@@ -2,16 +2,6 @@ from django.shortcuts import render
 from django.http import HttpRequest
 from .models import CSVData
 import math
-import csv
-
-
-def upload_csv(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            CSVData.objects.create(data=row)
-    return True
-
 
 # Calculate distance between two geographical
 # coordinates using Haversine formula
@@ -38,7 +28,6 @@ def get_unique_categories():
 
 
 def map_view(request: HttpRequest):
-    upload_csv('./data/food-truck-data.csv')
     csv_data = CSVData.objects.all()
 
     random_lat = None
