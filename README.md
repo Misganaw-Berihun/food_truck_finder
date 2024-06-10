@@ -86,6 +86,13 @@ Enter the username and password you created in step 4 to log in to the Django ad
     </a>
   </div>
 
+#### Deployement
+
+* **Renderurl**: https://food-truck-finder-8h2u.onrender.com
+* **NB**: By default, the deployed application creates a superuser account with the following credentials:
+
+    * **Username:** admin
+    * **Password:** adminpassword
 
 License
 -------
