@@ -24,6 +24,7 @@ RUN ["python", "manage.py", "makemigrations", "app"]
 RUN ["python", "manage.py", "migrate"]
 
 # Copy the entrypoint script
+COPY data/food-truck-data.csv /code/data/food-truck-data.csv
 COPY entrypoint.sh /code/entrypoint.sh
 
 # Set environment variables for superuser creation
