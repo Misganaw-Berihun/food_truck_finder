@@ -1,40 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpRequest
-from .models import CSVData
-import math
-
-# Calculate distance between two geographical
-# coordinates using Haversine formula
-def haversine(lat1, lon1, lat2, lon2):
-    R = 6371  # Radius of the Earth in kilometers
-    dLat = math.radians(lat2 - lat1)
-    dLon = math.radians(lon2 - lon1)
-    a = (math.sin(dLat / 2) * math.sin(dLat / 2) +
-         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
-         math.sin(dLon / 2) * math.sin(dLon / 2))
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    distance = R * c
-    return distance
-
-
-def get_unique_categories():
-    categories = set()
-    csv_data = CSVData.objects.values_list('data', flat=True)
-    for item in csv_data:
-        food_items = item.get('FoodItems', '')
-        if isinstance(food_items, str):  # Check if the value is a string
-            categories.update(food_items.split(': '))
-    return categories
+from .utils.data_processing import (
+    fetch_csv_data, process_location_data, filter_by_category,
+    calculate_distances, get_top_unique_locations
+)
+from .utils.categories import get_unique_categories
 
 
 def map_view(request: HttpRequest):
-    csv_data = CSVData.objects.all()
+    csv_data = fetch_csv_data()
 
     random_lat = None
     random_lon = None
-    distances_and_locations = []
     selected_category = request.POST.get('category')
-
     if request.method == 'POST':
         lat_input = request.POST.get('latitude')
         lon_input = request.POST.get('longitude')
@@ -42,66 +20,19 @@ def map_view(request: HttpRequest):
             random_lat = float(lat_input)
             random_lon = float(lon_input)
 
-    if random_lat is not None and random_lon is not None:
-        # Calculate distances if user provided coordinates
-        for item in csv_data:
-            lat = item.data.get('Latitude')
-            lon = item.data.get('Longitude')
-            food_items = item.data.get('FoodItems')
-            applicant = item.data.get('Applicant')
-            address = item.data.get('Address')
-            facility_type = item.data.get('FacilityType')
-            if lat and lon and (float(lat), float(lon)) != (0.0, 0.0):
-                if selected_category and selected_category not in food_items:
-                    continue
-                distance = haversine(
-                    random_lat,
-                    random_lon,
-                    float(lat),
-                    float(lon))
-                distances_and_locations.append({
-                    'latitude': lat,
-                    'longitude': lon,
-                    'distance': distance,
-                    'applicant': applicant,
-                    'food_items': food_items,
-                    'address': address,
-                    'facility_type': facility_type
-                })
+    processed_data = [process_location_data(item) for item in csv_data]
+    filtered_data = filter_by_category(processed_data, selected_category)
+    filtered_data = [d for d in filtered_data if (float(d['latitude']),
+                     float(d['longitude'])) != (0.0, 0.0)]
 
-        # Sort by distances
-        distances_and_locations.sort(key=lambda x: x['distance'])
-
-        # Extract top 5 closest unique locations
-        unique_locations = []
-        for loc in distances_and_locations:
-            if loc not in unique_locations:
-                unique_locations.append(loc)
-            if len(unique_locations) == 5:
-                break
+    if (random_lat is not None and random_lon is not None):
+        locations_with_distances = calculate_distances(
+            filtered_data, random_lat, random_lon)
+        
+        unique_locations = get_top_unique_locations(locations_with_distances)
     else:
-        # If no user input, show all locations
-        for item in csv_data:
-            lat = item.data.get('Latitude')
-            lon = item.data.get('Longitude')
-            food_items = item.data.get('FoodItems')
-            applicant = item.data.get('Applicant')
-            address = item.data.get('Address')
-            facility_type = item.data.get('FacilityType')
-            if lat and lon and (float(lat), float(lon)) != (0.0, 0.0):
-                if selected_category and selected_category not in food_items:
-                    continue
-                distances_and_locations.append({
-                    'latitude': lat,
-                    'longitude': lon,
-                    'applicant': applicant,
-                    'food_items': food_items,
-                    'address': address,
-                    'facility_type': facility_type
-                })
-        unique_locations = distances_and_locations
+        unique_locations = filtered_data
 
-    # Prepare data for map
     data_with_coords = [
         {
             'latitude': item['latitude'],
