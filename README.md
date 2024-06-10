@@ -76,6 +76,17 @@ Enter the username and password you created in step 4 to log in to the Django ad
 *   4.Click the "upload" button to add the data to the database.
 *   5.Naviagate to [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/) in your web browser
 
+#### Video Demo
+<div>
+    <a href="https://www.loom.com/share/41cb26a6928249949a257e34405c04b5">
+      <p>Library | Loom - 10 June 2024 - Watch Video</p>
+    </a>
+    <a href="https://www.loom.com/share/41cb26a6928249949a257e34405c04b5">
+      <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/41cb26a6928249949a257e34405c04b5-with-play.gif">
+    </a>
+  </div>
+
+
 License
 -------
 
