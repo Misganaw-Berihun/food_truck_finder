@@ -1,0 +1,12 @@
+<!-- templates/admin/csv_data_changelist.html -->
+{% extends "admin/change_list.html" %}
+
+{% block object-tools %}
+<div class="object-tools">
+    <ul class="nav">
+        <li>
+            <a href="{{ upload_csv_url }}" class="addlink">Upload CSV</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}

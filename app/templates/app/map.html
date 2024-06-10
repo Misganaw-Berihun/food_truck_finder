@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>food-truck-finder</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
+    <link href="https://unpkg.com/tailwindcss@^2.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Food Truck Finder</h1>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <form method="post" id="coordinate-form" class="space-y-4">
+                {% csrf_token %}
+                <div class="flex flex-wrap space-x-4">
+                    <div class="flex-1">
+                        <label for="latitude" class="block text-sm font-medium text-gray-700">Latitude:</label>
+                        <input type="text" id="latitude" name="latitude" value="{% if random_lat is not None %}{{ random_lat }}{% endif %}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div class="flex-1">
+                        <label for="longitude" class="block text-sm font-medium text-gray-700">Longitude:</label>
+                        <input type="text" id="longitude" name="longitude" value="{% if random_lon is not None %}{{ random_lon }}{% endif %}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div class="flex-1">
+                        <label for="category" class="block text-sm font-medium text-gray-700">Food Category:</label>
+                        <select id="category" name="category" class="select2 mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="map" class="rounded-lg shadow-md"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+
+        var map = L.map('map').setView([0, 0], 2);
+
+        {% if random_lat is not None and random_lon is not None %}
+            map.setView([{{ random_lat }}, {{ random_lon }}], 10);
+        {% endif %}
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var data = {{ data_with_coords|safe }};
+        var markers = L.markerClusterGroup();
+
+        data.forEach(function(item) {
+            var latitude = parseFloat(item.latitude);
+            var longitude = parseFloat(item.longitude);
+            var applicant = item.applicant;
+            var foodItems = item.food_items;
+            var address = item.address;
+            var facilityType = item.facility_type;
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                var marker = L.marker([latitude, longitude])
+                    .bindPopup('<b>Applicant:</b> ' + applicant + '<br>' +
+                               '<b>Food Items:</b> ' + foodItems + '<br>' +
+                               '<b>Address:</b> ' + address + '<br>' +
+                               '<b>Facility Type:</b> ' + facilityType + '<br>' +
+                               '<b>Latitude:</b> ' + latitude + '<br>' +
+                               '<b>Longitude:</b> ' + longitude);
+                markers.addLayer(marker);
+            }
+        });
+
+        map.addLayer(markers);
+    </script>
+</body>
+</html>
